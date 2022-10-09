@@ -1,12 +1,12 @@
 import * as AWS  from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-//import { createLogger } from '../utils/logger'
+import { createLogger } from '../utils/logger'
 import { ProductItem } from '../models/ProductItem'
 //import { TodoUpdate } from '../models/TodoUpdate'
 
 const AWSXRay = require('aws-xray-sdk')
 const XAWS = AWSXRay.captureAWS(AWS)
-//const logger = createLogger('DataAccess')
+const logger = createLogger('DataAccess')
 
 export class DataAccess {
 
@@ -91,8 +91,18 @@ export class DataAccess {
     const result = await this.docClient.get(todoItem).promise()
     return result.Item as TodoItem
   }
+*/
 
-  async getTodosForUser( userid: string ) : Promise<TodoItem[]> {
+async getAllProducts() : Promise<ProductItem[]> {
+  logger.info("getAllProducts", { } )
+  const result = await this.docClient.scan({
+    TableName: this.productTable
+  }).promise()
+
+  return result.Items as ProductItem[]
+}
+
+/*  async getReviewsForProduct( userid: string ) : Promise<TodoItem[]> {
     logger.info("getTodosForUser", { userid: userid, todoTable: this.todoTable, todoTableIndexname: this.todoTableIndexname } )
     const result = await this.docClient.query({
       TableName: this.todoTable,
@@ -104,8 +114,7 @@ export class DataAccess {
       ScanIndexForward: false
     }).promise()
     return result.Items as TodoItem[]
-  } 
-*/
+  } */
 }
 
 function createDynamoDBClient() {

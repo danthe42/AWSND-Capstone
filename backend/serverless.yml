@@ -79,6 +79,21 @@ functions:
         Resource:
           - '*' 
 
+  GetAllProducts:
+    handler: src/lambda/http/getProducts.handler
+    events:
+      - http:
+          method: get
+          path: products
+          cors: true
+          authorizer: 
+            name: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: !GetAtt ProductDynamoDBTable.Arn
+
 resources:
   Resources:
     GatewayResponseDefault4XX:

@@ -54,13 +54,11 @@ export async function createProduct(
   logger.info("Created new product", newItem )
   return newItem
 }
-/*
-export async function getTodosForUser ( 
-  userId: string 
-) : Promise<TodoItem[]> {
-  return await todoAccess.getTodosForUser( userId )
-}
 
+export async function getAllProducts() : Promise<ProductItem[]> {
+  return await dataAccessor.getAllProducts()
+}
+/*
 
 export async function createAttachmentPresignedUrl ( 
   todoId: string, 
