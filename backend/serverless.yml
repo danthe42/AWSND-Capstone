@@ -7,6 +7,9 @@ plugins:
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
 
+package:
+  individually: false
+
 provider:
   name: aws
   runtime: nodejs16.x
@@ -17,18 +20,48 @@ provider:
   tracing:
     lambda: true
     apiGateway: true
-  iamRoleStatements:
-    - Effect: 'Allow'
-      Action:
-        - 'xray:PutTraceSegments'
-        - 'xray:PutTelemetryRecords'
-      Resource:
-        - '*' 
-    - Effect: Allow
-      Action:
-        - 'logs:PutLogEvents'
-        - 'logs:CreateLogStream'
-        - 'logs:CreateLogGroup'
-      Resource:
-      - '*'  
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'xray:PutTraceSegments'
+            - 'xray:PutTelemetryRecords'
+          Resource:
+            - '*' 
+        - Effect: Allow
+          Action:
+            - 'logs:PutLogEvents'
+            - 'logs:CreateLogStream'
+            - 'logs:CreateLogGroup'
+          Resource:
+          - '*'
+  
+  logs:
+    restApi: true
+
+functions:
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
+
+  GetTodos:
+    handler: src/lambda/auth/auth0Authorizer.handler
+    events:
+      - http:
+          method: get
+          path: todos
+          cors: true
+          authorizer: Auth
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
 
