@@ -6,6 +6,8 @@ plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
+  - serverless-dynamodb-local
+  - serverless-offline
 
 package:
   individually: false
@@ -36,7 +38,12 @@ provider:
             - 'logs:CreateLogGroup'
           Resource:
           - '*'
-  
+
+  environment:          
+    PRODUCT_TABLE: Product-${self:provider.stage}
+    REVIEW_TABLE: Review-${self:provider.stage}
+    REVIEWS_CREATED_AT_INDEX: ReviewsCreatedAtIndex-${self:provider.stage}
+
   logs:
     restApi: true
 
@@ -64,4 +71,57 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
+    
+    ProductDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: ProductID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ProductID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.PRODUCT_TABLE}
+
+    ReviewDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: ProductID
+            AttributeType: S
+          - AttributeName: ReviewID
+            AttributeType: S
+          - AttributeName: CreatedAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ProductID
+            KeyType: HASH
+          - AttributeName: ReviewID
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.REVIEW_TABLE}
+        LocalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.REVIEWS_CREATED_AT_INDEX}
+            KeySchema:
+              - AttributeName: ProductID
+                KeyType: HASH
+              - AttributeName: CreatedAt
+                KeyType: RANGE              # to get reviews in order for a given product 
+            Projection:
+              ProjectionType: ALL # What attributes will be copied to an index 
+
+custom:
+  serverless-offline:
+    port:3003
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    stages:
+      - dev
+
+
+
 
