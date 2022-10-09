@@ -45,20 +45,39 @@ provider:
     REVIEWS_CREATED_AT_INDEX: ReviewsCreatedAtIndex-${self:provider.stage}
 
   logs:
-    restApi: true
+    restApi:       
+      accessLogging: true
+      format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","resourcePath":"$context.resourcePath","status":$context.status,"responseLatency":$context.responseLatency}'
+      executionLogging: true
 
 functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  GetTodos:
-    handler: src/lambda/auth/auth0Authorizer.handler
+  CreateProduct:
+    handler: src/lambda/http/createProduct.handler
     events:
       - http:
-          method: get
-          path: todos
+          method: post
+          path: products
           cors: true
-          authorizer: Auth
+          authorizer: 
+            name: Auth
+          request:
+            schemas:
+              application/json: ${file(models/create-product-model.json)}
+
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: !GetAtt ProductDynamoDBTable.Arn
+      - Effect: 'Allow'
+        Action:
+          - 'xray:PutTraceSegments'
+          - 'xray:PutTelemetryRecords'
+        Resource:
+          - '*' 
 
 resources:
   Resources:
