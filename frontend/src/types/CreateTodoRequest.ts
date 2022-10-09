@@ -1,4 +1,3 @@
-export interface CreateTodoRequest {
-  name: string
-  dueDate: string
+export interface CreateProductRequest {
+  Title: string
 }

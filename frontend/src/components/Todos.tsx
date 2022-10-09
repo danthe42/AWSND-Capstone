@@ -1,8 +1,10 @@
 import dateFormat from 'dateformat'
 import { History } from 'history'
 import update from 'immutability-helper'
+import { Group } from './Group'
 import * as React from 'react'
 import {
+  Card,
   Button,
   Checkbox,
   Divider,
@@ -14,9 +16,9 @@ import {
   Loader
 } from 'semantic-ui-react'
 
-import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
+import { createProduct, deleteTodo, getProducts, patchTodo } from '../api/todos-api'
 import Auth from '../auth/Auth'
-import { Todo } from '../types/Todo'
+import { Product } from '../types/ProductModel'
 
 interface TodosProps {
   auth: Auth
@@ -24,7 +26,7 @@ interface TodosProps {
 }
 
 interface TodosState {
-  todos: Todo[]
+  todos: Product[]
   newTodoName: string
   loadingTodos: boolean
 }
@@ -46,10 +48,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
-      const dueDate = this.calculateDueDate()
-      const newTodo = await createTodo(this.props.auth.getIdToken(), {
-        name: this.state.newTodoName,
-        dueDate
+      const newTodo = await createProduct(this.props.auth.getIdToken(), {
+        Title: this.state.newTodoName
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
@@ -61,18 +61,18 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   onTodoDelete = async (todoId: string) => {
-    try {
+ /*   try {
       await deleteTodo(this.props.auth.getIdToken(), todoId)
       this.setState({
         todos: this.state.todos.filter(todo => todo.todoId !== todoId)
       })
     } catch {
       alert('Todo deletion failed')
-    }
+    }*/
   }
 
   onTodoCheck = async (pos: number) => {
-    try {
+  /*  try {
       const todo = this.state.todos[pos]
       await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
         name: todo.name,
@@ -86,12 +86,12 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       })
     } catch {
       alert('Todo deletion failed')
-    }
+    }*/
   }
 
   async componentDidMount() {
     try {
-      const todos = await getTodos(this.props.auth.getIdToken())
+      const todos = await getProducts(this.props.auth.getIdToken())
       this.setState({
         todos,
         loadingTodos: false
@@ -104,7 +104,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
+        <Header as="h1">Reviews</Header>
 
         {this.renderCreateTodoInput()}
 
@@ -122,12 +122,12 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'New task',
+              content: 'New product to review',
               onClick: this.onTodoCreate
             }}
             fluid
             actionPosition="left"
-            placeholder="To change the world..."
+            placeholder="To review the world..."
             onChange={this.handleNameChange}
           />
         </Grid.Column>
@@ -150,7 +150,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading Products
         </Loader>
       </Grid.Row>
     )
@@ -158,6 +158,18 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   renderTodosList() {
     return (
+      <div>
+      <h1>Products</h1>
+
+      <Card.Group>
+          {this.state.todos.map(group => {
+            return <Group key={group.ProductID} group={group} />
+          })}
+      </Card.Group>
+
+      </div>
+
+    /*
       <Grid padded>
         {this.state.todos.map((todo, pos) => {
           return (
@@ -202,13 +214,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           )
         })}
       </Grid>
+      */
     )
   }
 
-  calculateDueDate(): string {
-    const date = new Date()
-    date.setDate(date.getDate() + 7)
-
-    return dateFormat(date, 'yyyy-mm-dd') as string
-  }
 }
