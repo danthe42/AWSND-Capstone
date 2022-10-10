@@ -1,11 +1,11 @@
 import * as uuid from 'uuid'
 import { ProductItem } from '../models/ProductItem'
 import { ReviewItem } from '../models/ReviewItem'
-//import { TodoUpdate } from '../models/TodoUpdate'
+import { ProductUpdate } from '../models/ProductUpdate'
 import { DataAccess } from '../dataLayer/DataAccess'
 import { CreateProductRequest } from '../requests/CreateProductRequest'
 import { CreateReviewRequest } from '../requests/CreateReviewRequest'
-//import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+import { UpdateProductRequest } from '../requests/UpdateProductRequest'
 //import { getUploadUrl, getReadUrl } from '../helpers/attachmentUtils'
 import { createLogger } from '../utils/logger'
 
@@ -24,19 +24,22 @@ export async function deleteTodo(
 
   await todoAccess.deleteTodoItem( todoId, userId )
 } 
-
-export async function updateTodo(
-  updatedTodo: UpdateTodoRequest,
-  userId: string,
-  todoId: string
-): Promise<void> {
-  const todo = await todoAccess.getItem( todoId, userId )
-  if (!todo)
-    throw new Error("Todo record was not found, or the current user is not the owner of it")
-
-  await todoAccess.updateTodoItem( todoId, userId, updatedTodo as TodoUpdate )
-}
 */
+
+export async function updateProduct(
+  updatedProduct: UpdateProductRequest,
+  userId: string,
+  productId: string
+): Promise<void> {
+  const product = await dataAccessor.getOneProduct( productId )
+  if (!product || product.length==0)
+    throw new Error("Product record was not found")
+  if (product[0].UserID != userId)
+    throw new Error("Product record to update is not owned by us !")
+
+  await dataAccessor.updateProductItem( productId, userId, updatedProduct as ProductUpdate )
+}
+
 export async function createProduct(
   createProductRequest: CreateProductRequest,
   userId: string

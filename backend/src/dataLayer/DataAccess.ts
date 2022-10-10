@@ -3,7 +3,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
 import { ProductItem } from '../models/ProductItem'
 import { ReviewItem } from '../models/ReviewItem'
-//import { TodoUpdate } from '../models/TodoUpdate'
+import { ProductUpdate } from '../models/ProductUpdate'
 
 const AWSXRay = require('aws-xray-sdk')
 const XAWS = AWSXRay.captureAWS(AWS)
@@ -70,27 +70,24 @@ export class DataAccess {
       TableName: this.todoTable
   }).promise() 
 }
-
-  async updateTodoItem(   
-    todoId: string,
-    userId: string,
-    todoUpdate: TodoUpdate): Promise<void> {
+*/
+  async updateProductItem (   
+    ProductID: string,
+    _UserId: string,
+    productUpdate: ProductUpdate): Promise<void> {
     await this.docClient.update({
       Key: {
-          todoId: todoId,
-          userId: userId
+        ProductID: ProductID
       },
-      UpdateExpression: 'SET #name=:name, dueDate=:dueDate, done=:done',          // Attribute "name" is a reserved keyword, so use #name workaround
-      ExpressionAttributeNames: { '#name': 'name' },
+      UpdateExpression: 'SET Title=:title, Description=:desc',          // Attribute "name" is a reserved keyword, so use #name workaround
       ExpressionAttributeValues: { 
-        ':name': todoUpdate.name,
-        ':dueDate': todoUpdate.dueDate,
-        ':done': todoUpdate.done
+        ':title': productUpdate.Title,
+        ':desc': productUpdate.Description
       },
-      TableName: this.todoTable
+      TableName: this.productTable
     }).promise() 
   }
-
+/*
   async getItem( todoId : string, userId : string ) : Promise<TodoItem> {
     const todoItem = {
       Key: {
