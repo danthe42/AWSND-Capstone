@@ -2,27 +2,25 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
-import { getProducts } from '../../businessLogic/Logic'
+import { getReviews } from '../../businessLogic/Logic'
 import { createLogger } from '../../utils/logger'
+import { getUserId } from '../utils';
 
-const logger = createLogger('getProducts')
+const logger = createLogger('getReviews')
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    let pid = undefined
-    if (event.pathParameters)
-    {
-      pid = event.pathParameters.ProductID
-      logger.info("getProducts", { ProductID: pid } )
-    }
+    let pid = event.pathParameters.ProductID
+    const userid = getUserId( event )
 
-    const products = await getProducts(pid)
-    logger.info("getProducts", products )
+    logger.info("getReviews call", { ProductID: pid } )
+    const reviews = await getReviews(userid, pid)
+    logger.info("getProducts retval", reviews )
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        items: products
+        items: reviews
       })
     }
   })

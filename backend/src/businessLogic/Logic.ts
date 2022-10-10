@@ -1,8 +1,10 @@
 import * as uuid from 'uuid'
 import { ProductItem } from '../models/ProductItem'
+import { ReviewItem } from '../models/ReviewItem'
 //import { TodoUpdate } from '../models/TodoUpdate'
 import { DataAccess } from '../dataLayer/DataAccess'
 import { CreateProductRequest } from '../requests/CreateProductRequest'
+import { CreateReviewRequest } from '../requests/CreateReviewRequest'
 //import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 //import { getUploadUrl, getReadUrl } from '../helpers/attachmentUtils'
 import { createLogger } from '../utils/logger'
@@ -55,16 +57,41 @@ export async function createProduct(
   return newItem
 }
 
+export async function createReview(
+  createReviewRequest: CreateReviewRequest,
+  userId: string,
+  productId: string
+): Promise<ReviewItem> {
+
+  const itemId = uuid.v4()
+
+  const newItem : ReviewItem = await dataAccessor.createReviewItem({
+    ProductID: productId,
+    ReviewID: itemId,
+    UserID: userId,
+    CreatedAt: new Date().toISOString(),
+    ...createReviewRequest
+  }) as ReviewItem
+
+  logger.info("Created new review record", newItem )
+  return newItem
+}
+
 export async function getProducts(ProductID? : string ) : Promise<ProductItem[]> {
   if (ProductID)
   {
-    return await dataAccessor.getOneProduct(ProductID)        // DB Query
+    return await dataAccessor.getOneProduct(ProductID)        // DB Get
   }
   else
   {
     return await dataAccessor.getAllProducts()                // DB Scan
   }
 }
+
+export async function getReviews( UserID: string, ProductID : string ) : Promise<ReviewItem[]> {
+  return await dataAccessor.getReviewsForProduct(UserID, ProductID)                
+}
+
 /*
 
 export async function createAttachmentPresignedUrl ( 

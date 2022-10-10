@@ -2,6 +2,7 @@ import * as AWS  from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
 import { ProductItem } from '../models/ProductItem'
+import { ReviewItem } from '../models/ReviewItem'
 //import { TodoUpdate } from '../models/TodoUpdate'
 
 const AWSXRay = require('aws-xray-sdk')
@@ -12,9 +13,9 @@ export class DataAccess {
 
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
-    private readonly productTable = process.env.PRODUCT_TABLE
-  //  private readonly reviewTable = process.env.REVIEW_TABLE,
-  //  private readonly reviewTableIndexname = process.env.REVIEWS_CREATED_AT_INDEX
+    private readonly productTable = process.env.PRODUCT_TABLE,
+    private readonly reviewTable = process.env.REVIEW_TABLE,
+    private readonly reviewTableIndexname = process.env.REVIEWS_CREATED_AT_INDEX
     ) {
   }
 
@@ -32,7 +33,18 @@ export class DataAccess {
     await this.docClient.delete( todoItem ).promise()
   }
 */
+  async createReviewItem(reviewItem: ReviewItem): Promise<ReviewItem> {
+    logger.info("createReviewItem", reviewItem )
+    await this.docClient.put({
+      TableName: this.reviewTable,
+      Item: reviewItem
+    }).promise()
+
+    return reviewItem
+  }
+
   async createProductItem(productItem: ProductItem): Promise<ProductItem> {
+    logger.info("createProductItem", productItem )
     await this.docClient.put({
       TableName: this.productTable,
       Item: productItem
@@ -93,44 +105,44 @@ export class DataAccess {
   }
 */
 
-async getAllProducts() : Promise<ProductItem[]> {
-  logger.info("getAllProducts", { } )
-  const result = await this.docClient.scan({
-    TableName: this.productTable
-  }).promise()
+  async getAllProducts() : Promise<ProductItem[]> {
+    logger.info("getAllProducts", { } )
+    const result = await this.docClient.scan({
+      TableName: this.productTable
+    }).promise()
 
-  return result.Items as ProductItem[]
-}
-
-async getOneProduct(ProductID: string) : Promise<ProductItem[]> {
-  logger.info("getOneProduct", { ProductID: ProductID } )
-  const productItem = {
-    Key: {
-      ProductID: ProductID
-    },
-    TableName: this.productTable
+    return result.Items as ProductItem[]
   }
 
-  const result = await this.docClient.get(productItem).promise()
-  if (!result || !result.Item)
-    return [ ] as ProductItem[]
-  else 
-    return [ result.Item ] as ProductItem[]
-}
-
-/*  async getReviewsForProduct( userid: string ) : Promise<TodoItem[]> {
-    logger.info("getTodosForUser", { userid: userid, todoTable: this.todoTable, todoTableIndexname: this.todoTableIndexname } )
-    const result = await this.docClient.query({
-      TableName: this.todoTable,
-      IndexName: this.todoTableIndexname,
-      KeyConditionExpression: 'userId = :userId',
-      ExpressionAttributeValues: {
-        ':userId': userid
+  async getOneProduct(ProductID: string) : Promise<ProductItem[]> {
+    logger.info("getOneProduct", { ProductID: ProductID } )
+    const productItem = {
+      Key: {
+        ProductID: ProductID
       },
-      ScanIndexForward: false
+      TableName: this.productTable
+    }
+
+    const result = await this.docClient.get(productItem).promise()
+    if (!result || !result.Item)
+      return [ ] as ProductItem[]
+    else 
+      return [ result.Item ] as ProductItem[]
+  }
+
+  async getReviewsForProduct( UserID: string, ProductID: string ) : Promise<ReviewItem[]> {
+    logger.info("getReviewsForProduct", { userid: UserID, productid: ProductID } )
+    const result = await this.docClient.query({
+      TableName: this.reviewTable,
+      IndexName: this.reviewTableIndexname,
+      KeyConditionExpression: 'ProductID = :ProductID',
+      ExpressionAttributeValues: {
+        ':ProductID': ProductID
+      },
+      ScanIndexForward: true
     }).promise()
-    return result.Items as TodoItem[]
-  } */
+    return result.Items as ReviewItem[]
+  } 
 }
 
 function createDynamoDBClient() {
