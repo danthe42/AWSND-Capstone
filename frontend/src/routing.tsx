@@ -4,6 +4,8 @@ import { Router, Route } from 'react-router-dom'
 import Callback from './components/Callback'
 import createHistory from 'history/createBrowserHistory'
 import App from './App';
+import { EditTodo } from './components/EditTodo';
+
 const history = createHistory()
 
 const auth = new Auth(history)
@@ -26,6 +28,14 @@ export const makeAuthRouting = () => {
             return <Callback />
           }}
         />
+        <Route
+          path="/product/:ProductID"
+          exact
+          render={props => {
+            return <EditTodo {...props} auth={auth} />
+          }}
+        />
+
         <Route
           render={props => {
             return <App auth={auth} {...props} />
