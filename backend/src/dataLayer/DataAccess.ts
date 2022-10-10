@@ -102,6 +102,22 @@ async getAllProducts() : Promise<ProductItem[]> {
   return result.Items as ProductItem[]
 }
 
+async getOneProduct(ProductID: string) : Promise<ProductItem[]> {
+  logger.info("getOneProduct", { ProductID: ProductID } )
+  const productItem = {
+    Key: {
+      ProductID: ProductID
+    },
+    TableName: this.productTable
+  }
+
+  const result = await this.docClient.get(productItem).promise()
+  if (!result || !result.Item)
+    return [ ] as ProductItem[]
+  else 
+    return [ result.Item ] as ProductItem[]
+}
+
 /*  async getReviewsForProduct( userid: string ) : Promise<TodoItem[]> {
     logger.info("getTodosForUser", { userid: userid, todoTable: this.todoTable, todoTableIndexname: this.todoTableIndexname } )
     const result = await this.docClient.query({

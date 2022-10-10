@@ -55,8 +55,15 @@ export async function createProduct(
   return newItem
 }
 
-export async function getAllProducts() : Promise<ProductItem[]> {
-  return await dataAccessor.getAllProducts()
+export async function getProducts(ProductID? : string ) : Promise<ProductItem[]> {
+  if (ProductID)
+  {
+    return await dataAccessor.getOneProduct(ProductID)        // DB Query
+  }
+  else
+  {
+    return await dataAccessor.getAllProducts()                // DB Scan
+  }
 }
 /*
 
