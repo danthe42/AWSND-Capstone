@@ -16,7 +16,8 @@ export class DataAccess {
     private readonly productTable = process.env.PRODUCT_TABLE,
     private readonly productTableIndexname = process.env.PRODUCT_PRODUCTID_INDEX,
     private readonly reviewTable = process.env.REVIEW_TABLE,
-    private readonly reviewTableIndexname = process.env.REVIEWS_CREATED_AT_INDEX
+    private readonly reviewTableIndexname = process.env.REVIEWS_CREATED_AT_INDEX,
+    private readonly maximumProducts : number = parseInt( process.env.MAXIMUM_PRODUCT_COUNT )
     ) {
   }
 
@@ -115,6 +116,7 @@ export class DataAccess {
       ExpressionAttributeValues: {
         ':pkey': pkey
       },
+      Limit: this.maximumProducts,
       ScanIndexForward: false
     }).promise()
 

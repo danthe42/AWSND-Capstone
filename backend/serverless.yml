@@ -46,6 +46,7 @@ provider:
     PRODUCT_PRODUCTID_INDEX: ProductProductIDIndex-${self:provider.stage}-5
     IMAGES_S3_BUCKET: reviewapp-images-azd49-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+    MAXIMUM_PRODUCT_COUNT: 100
 
   logs:
     restApi:       
