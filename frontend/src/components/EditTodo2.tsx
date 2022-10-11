@@ -87,6 +87,8 @@ export class EditTodo2 extends React.PureComponent<
           product: p,
           attrchanged: false
         })  
+        alert('Product was updated successfully!')
+
       } catch {
         console.log("Megvan!")
         alert('Update product attr. failed. Network error, or permission denied (is this your product?)')
@@ -95,7 +97,7 @@ export class EditTodo2 extends React.PureComponent<
   }
 
   handleSubmit = async (event: React.SyntheticEvent) => {
-/*    event.preventDefault()
+    event.preventDefault()
 
     try {
       if (!this.state.file) {
@@ -104,17 +106,17 @@ export class EditTodo2 extends React.PureComponent<
       }
 
       this.setUploadState(UploadState.FetchingPresignedUrl)
-      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.ProductID)
 
       this.setUploadState(UploadState.UploadingFile)
-      await uploadFile(uploadUrl, this.state.file)
+//      await uploadFile(uploadUrl, this.state.file)
 
-      alert('File was uploaded!')
+    alert('File was uploaded!')
     } catch (e) {
       alert('Could not upload a file: ' + (e as Error).message)
     } finally {
       this.setUploadState(UploadState.NoUpload)
-    }*/
+    }
   }
 
   setUploadState(uploadState: UploadState) {
@@ -168,7 +170,7 @@ export class EditTodo2 extends React.PureComponent<
 
           <h1>Edit product</h1>
 
-          <Form onSubmit={this.handleSubmit}>
+          <Form>
           <Form.Field>
           <label>
           Title:
@@ -190,7 +192,7 @@ export class EditTodo2 extends React.PureComponent<
           <br/>
           <br/>
 
-          <h2>Upload new image</h2>
+          <h2>Product photo</h2>
 
           <Form onSubmit={this.handleSubmit}>
             <Form.Field>

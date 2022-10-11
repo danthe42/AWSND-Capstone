@@ -10,13 +10,21 @@ export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const newProduct: CreateProductRequest = JSON.parse(event.body)
     const userid = getUserId( event )
-    const newItem = await createProduct(newProduct, userid)
+    try 
+    {
+      const newItem = await createProduct(newProduct, userid)
 
-    return {
-      statusCode: 201,
-      body: JSON.stringify({
-        item: newItem
-      })
+      return {
+        statusCode: 201,
+        body: JSON.stringify({
+          item: newItem
+        })
+      }
+    } catch(e) {     
+      return {
+        statusCode: 400,
+        body: e
+      }
     }
   }
 )

@@ -1,4 +1,5 @@
 export interface ProductItem {
+  PartitionKey: string
   ProductID: string
   UserID: string
   CreatedAt: string

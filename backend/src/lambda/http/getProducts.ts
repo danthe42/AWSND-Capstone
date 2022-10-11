@@ -16,14 +16,22 @@ export const handler = middy(
       logger.info("getProducts", { ProductID: pid } )
     }
 
-    const products = await getProducts(pid)
-    logger.info("getProducts", products )
+    try 
+    {
+      const products = await getProducts(pid)
+      logger.info("getProducts", products )
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        items: products
-      })
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          items: products
+        })
+      }
+    } catch (e) {
+      return {
+        statusCode: 400,
+        body: e
+      }
     }
   })
 

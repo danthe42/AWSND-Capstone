@@ -23,7 +23,7 @@ export const handler = middy(
     } catch(e) {
       return {
         statusCode: 401,
-        body: ""
+        body: e
       }
     }
   }

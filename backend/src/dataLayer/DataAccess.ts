@@ -14,6 +14,7 @@ export class DataAccess {
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
     private readonly productTable = process.env.PRODUCT_TABLE,
+    private readonly productTableIndexname = process.env.PRODUCT_PRODUCTID_INDEX,
     private readonly reviewTable = process.env.REVIEW_TABLE,
     private readonly reviewTableIndexname = process.env.REVIEWS_CREATED_AT_INDEX
     ) {
@@ -72,12 +73,14 @@ export class DataAccess {
 }
 */
   async updateProductItem (   
-    ProductID: string,
+    createdAt: string,
     _UserId: string,
     productUpdate: ProductUpdate): Promise<void> {
+    let pkey:string = "1"
     await this.docClient.update({
       Key: {
-        ProductID: ProductID
+        PartitionKey: pkey,
+        CreatedAt: createdAt
       },
       UpdateExpression: 'SET Title=:title, Description=:desc',          // Attribute "name" is a reserved keyword, so use #name workaround
       ExpressionAttributeValues: { 
@@ -104,27 +107,45 @@ export class DataAccess {
 
   async getAllProducts() : Promise<ProductItem[]> {
     logger.info("getAllProducts", { } )
-    const result = await this.docClient.scan({
-      TableName: this.productTable
+    let pkey:string = "1"
+
+    const result = await this.docClient.query({
+      TableName: this.productTable,
+      KeyConditionExpression: 'PartitionKey = :pkey',
+      ExpressionAttributeValues: {
+        ':pkey': pkey
+      },
+      ScanIndexForward: false
     }).promise()
+
+    logger.info("getAllProduct retval", result.Items )
 
     return result.Items as ProductItem[]
   }
 
   async getOneProduct(ProductID: string) : Promise<ProductItem[]> {
     logger.info("getOneProduct", { ProductID: ProductID } )
-    const productItem = {
-      Key: {
-        ProductID: ProductID
-      },
-      TableName: this.productTable
+
+    const item = {
+      TableName: this.productTable,
+      IndexName: this.productTableIndexname,
+      KeyConditionExpression: 'ProductID = :pid',
+      ExpressionAttributeValues: {
+        ':pid': ProductID
+      }
+    }
+    logger.info("getOneProduct item", item )
+
+    const result = await this.docClient.query(item).promise()
+    logger.info("getOneProduct retval", result.Items )
+
+    if (!result || result.Count !== 1)
+    {
+      logger.warning("getOneProduct: record not found !", { ProductID: ProductID } )
+      throw Error("Product not found")
     }
 
-    const result = await this.docClient.get(productItem).promise()
-    if (!result || !result.Item)
-      return [ ] as ProductItem[]
-    else 
-      return [ result.Item ] as ProductItem[]
+    return result.Items as ProductItem[]
   }
 
   async getReviewsForProduct( UserID: string, ProductID: string ) : Promise<ReviewItem[]> {

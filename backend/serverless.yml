@@ -40,9 +40,10 @@ provider:
           - '*'
 
   environment:          
-    PRODUCT_TABLE: Product-${self:provider.stage}
-    REVIEW_TABLE: Review-${self:provider.stage}
-    REVIEWS_CREATED_AT_INDEX: ReviewsCreatedAtIndex-${self:provider.stage}
+    PRODUCT_TABLE: Product-${self:provider.stage}-5
+    REVIEW_TABLE: Review-${self:provider.stage}-5
+    REVIEWS_CREATED_AT_INDEX: ReviewsCreatedAtIndex-${self:provider.stage}-5
+    PRODUCT_PRODUCTID_INDEX: ProductProductIDIndex-${self:provider.stage}-5
     IMAGES_S3_BUCKET: reviewapp-images-azd49-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
@@ -98,12 +99,36 @@ functions:
           - dynamodb:GetItem
           - dynamodb:UpdateItem
         Resource: !GetAtt ProductDynamoDBTable.Arn
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCT_TABLE}/index/${self:provider.environment.PRODUCT_PRODUCTID_INDEX}
       - Effect: 'Allow'
         Action:
           - 'xray:PutTraceSegments'
           - 'xray:PutTelemetryRecords'
         Resource:
           - '*' 
+
+#  GenerateUploadUrl:
+#    handler: src/lambda/http/generateUploadUrl.handler
+#    events:
+#      - http:
+#          method: post
+#          path: products/modify/{ProductID}/attachment
+#          cors: true
+#          authorizer: 
+#            name: Auth
+#    iamRoleStatements:
+#      - Effect: Allow
+#        Action:
+#          - s3:PutObject
+#        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+#      - Effect: Allow
+#        Action:
+#          - dynamodb:GetItem
+#          - dynamodb:UpdateItem
+#        Resource: !GetAtt ProductDynamoDBTable.Arn
 
   CreateReview:
     handler: src/lambda/http/createReview.handler
@@ -148,9 +173,13 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Scan
+          - dynamodb:Query
           - dynamodb:GetItem
         Resource: !GetAtt ProductDynamoDBTable.Arn
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCT_TABLE}/index/${self:provider.environment.PRODUCT_PRODUCTID_INDEX}
 
   GetReviews:
     handler: src/lambda/http/getReviews.handler
@@ -193,13 +222,27 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
+          - AttributeName: PartitionKey
+            AttributeType: S
           - AttributeName: ProductID
             AttributeType: S
+          - AttributeName: CreatedAt
+            AttributeType: S
         KeySchema:
-          - AttributeName: ProductID
+          - AttributeName: PartitionKey
             KeyType: HASH
+          - AttributeName: CreatedAt
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.PRODUCT_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.PRODUCT_PRODUCTID_INDEX}
+            KeySchema:
+            - AttributeName: ProductID
+              KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
 
     ReviewDynamoDBTable:
       Type: AWS::DynamoDB::Table

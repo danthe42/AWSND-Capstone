@@ -37,7 +37,7 @@ export async function updateProduct(
   if (product[0].UserID != userId)
     throw new Error("Product record to update is not owned by us !")
 
-  await dataAccessor.updateProductItem( productId, userId, updatedProduct as ProductUpdate )
+  await dataAccessor.updateProductItem( product[0].CreatedAt, userId, updatedProduct as ProductUpdate )
 }
 
 export async function createProduct(
@@ -48,6 +48,7 @@ export async function createProduct(
   const itemId = uuid.v4()
 
   const newItem : ProductItem = await dataAccessor.createProductItem({
+    PartitionKey: "1",
     ProductID: itemId,
     UserID: userId,
     CreatedAt: new Date().toISOString(),
