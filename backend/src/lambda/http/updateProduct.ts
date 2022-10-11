@@ -13,10 +13,18 @@ export const handler = middy(
     const pid : string = event.pathParameters.ProductID
     const updatedProduct: UpdateProductRequest = JSON.parse(event.body)
     const userid = getUserId( event )
-    await updateProduct( updatedProduct, userid, pid )
-    return {
-      statusCode: 200,
-      body: ""
+    try 
+    {
+      await updateProduct( updatedProduct, userid, pid )
+      return {
+        statusCode: 200,
+        body: ""
+      }
+    } catch(e) {
+      return {
+        statusCode: 401,
+        body: ""
+      }
     }
   }
 )
