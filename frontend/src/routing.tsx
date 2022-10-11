@@ -5,6 +5,8 @@ import Callback from './components/Callback'
 import createHistory from 'history/createBrowserHistory'
 import App from './App';
 import { EditTodo } from './components/EditTodo';
+import { EditTodo2 } from './components/EditTodo2'
+
 
 const history = createHistory()
 
@@ -33,6 +35,14 @@ export const makeAuthRouting = () => {
           exact
           render={props => {
             return <EditTodo {...props} auth={auth} />
+          }}
+        />
+
+        <Route
+          path="/editproduct/:ProductID"
+          exact
+          render={props => {
+            return <EditTodo2 {...props} auth={auth} />
           }}
         />
 

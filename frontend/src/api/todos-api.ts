@@ -1,6 +1,6 @@
 import { apiEndpoint } from '../config'
 import { Product, Review } from '../types/ProductModel';
-import { CreateProductRequest, CreateReviewRequest } from '../types/CreateTodoRequest';
+import { CreateProductRequest, UpdateProductRequest, CreateReviewRequest } from '../types/CreateTodoRequest';
 import Axios from 'axios'
 import { UpdateTodoRequest } from '../types/UpdateTodoRequest';
 
@@ -28,6 +28,17 @@ export async function getProduct(idToken: string, ProductID : string): Promise<P
   })
   console.log('Product info received:', response.data)
   return response.data.items[0]
+}
+
+export async function updateProduct(idToken: string, ProductID : string, updatedProduct: UpdateProductRequest): Promise<void> {
+  console.log('Fetching product info for ' + ProductID)
+
+  const response = await Axios.patch(`${apiEndpoint}/products/modify/${ProductID}`, JSON.stringify(updatedProduct), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    }
+  })
 }
 
 export async function getReviews(idToken: string, ProductID : string): Promise<Review[]> {
