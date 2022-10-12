@@ -21,20 +21,21 @@ export class DataAccess {
     ) {
   }
 
-/*  async deleteTodoItem(  
-    todoId: string,
-    userId: string
+  async deleteProductItem(  
+    createdAt: string,
+    _userId: string
   ) : Promise<void> {
-    const todoItem = {
+    let pkey:string = "1"
+    const productItem = {
       Key: {
-        userId: userId,
-        todoId: todoId   
-      },
-      TableName: this.todoTable
+        PartitionKey: pkey,
+        CreatedAt: createdAt
+    },
+      TableName: this.productTable
     }
-    await this.docClient.delete( todoItem ).promise()
+    await this.docClient.delete( productItem ).promise()
   }
-*/
+
   async createReviewItem(reviewItem: ReviewItem): Promise<ReviewItem> {
     logger.info("createReviewItem", reviewItem )
     await this.docClient.put({
@@ -125,11 +126,11 @@ export class DataAccess {
     logger.info("getOneProduct item", item )
 
     const result = await this.docClient.query(item).promise()
-    logger.info("getOneProduct retval", result.Items )
+    logger.info("getOneProduct retval", { result } )
 
     if (!result || result.Count !== 1)
     {
-      logger.warning("getOneProduct: record not found !", { ProductID: ProductID } )
+      logger.info("getOneProduct: record not found !", { ProductID: ProductID } )
       throw Error("Product not found")
     }
 

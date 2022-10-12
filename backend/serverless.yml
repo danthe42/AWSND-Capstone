@@ -111,6 +111,34 @@ functions:
         Resource:
           - '*' 
 
+  DeleteProduct:
+    handler: src/lambda/http/deleteProduct.handler
+    events:
+      - http:
+          method: delete
+          path: products/modify/{ProductID}
+          cors: true
+          authorizer: 
+            name: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+          - dynamodb:DeleteItem
+        Resource: !GetAtt ProductDynamoDBTable.Arn
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCT_TABLE}/index/${self:provider.environment.PRODUCT_PRODUCTID_INDEX}
+      - Effect: 'Allow'
+        Action:
+          - 'xray:PutTraceSegments'
+          - 'xray:PutTelemetryRecords'
+        Resource:
+          - '*' 
+
+
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
     events:

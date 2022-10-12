@@ -159,7 +159,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
       <Card.Group>
           {this.state.todos.map(group => {
-            return <Group key={group.ProductID} group={group} history={this.props.history} />
+            return <Group key={group.ProductID} group={group} history={this.props.history} auth={this.props.auth} />
           })}
       </Card.Group>
 
