@@ -6,7 +6,7 @@ import { DataAccess } from '../dataLayer/DataAccess'
 import { CreateProductRequest } from '../requests/CreateProductRequest'
 import { CreateReviewRequest } from '../requests/CreateReviewRequest'
 import { UpdateProductRequest } from '../requests/UpdateProductRequest'
-//import { getUploadUrl, getReadUrl } from '../helpers/attachmentUtils'
+import { getUploadUrl, getReadUrl } from '../dataLayer/FileStoreAccess'
 import { createLogger } from '../utils/logger'
 
 const logger = createLogger('businesslogic')
@@ -96,23 +96,20 @@ export async function getReviews( UserID: string, ProductID : string ) : Promise
   return await dataAccessor.getReviewsForProduct(UserID, ProductID)                
 }
 
-/*
-
-export async function createAttachmentPresignedUrl ( 
-  todoId: string, 
+export async function createPresignedUrl ( 
+  productId: string, 
   userId: string 
 ) : Promise<string> {
 
-  const todo = await todoAccess.getItem( todoId, userId )
-  if (!todo)
-    throw new Error("Todo record was not found, or the current user is not the owner of it")
+  const prod = await dataAccessor.getOneProduct( productId )
+  if (!prod || prod.length<1 || prod[0].UserID !== userId)
+    throw new Error("Product record was not found, or the current user is not the owner of it")
 
-  const url : string = getUploadUrl( todoId )
-  const readUrl : string = getReadUrl( todoId )
-  logger.info("createAttachmentPresignedUrl", { presignedUrl: url, readUrl: readUrl } )
+  const url : string = getUploadUrl( productId )
+  const readUrl : string = getReadUrl( productId )
+  logger.info("createPresignedUrl", { presignedUrl: url, readUrl: readUrl } )
 
-  await todoAccess.updateTodoItem_attachment( todoId, userId, readUrl )
+  await dataAccessor.updateTodoItem_imageurl( prod[0].CreatedAt, readUrl )
 
   return url
 }
-*/

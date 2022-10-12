@@ -54,25 +54,25 @@ export class DataAccess {
 
     return productItem
   }
-/*
-  async updateTodoItem_attachment(
-    todoId: string,
-    userId: string,
-    url: string
-  ): Promise<void> {
-    await this.docClient.update({
-      Key: {
-          todoId: todoId,
-          userId: userId
-      },
-      UpdateExpression: 'SET attachmentUrl=:attachmentUrl',          
-      ExpressionAttributeValues: { 
-        ':attachmentUrl': url
-      },
-      TableName: this.todoTable
-  }).promise() 
-}
-*/
+
+  async updateTodoItem_imageurl(
+      createdAt: string,
+      url: string
+    ): Promise<void> {
+      let pkey:string = "1"
+      await this.docClient.update({
+        Key: {
+          PartitionKey: pkey,
+          CreatedAt: createdAt
+          },
+        UpdateExpression: 'SET ImageUrl=:url',          
+        ExpressionAttributeValues: { 
+          ':url': url
+        },
+        TableName: this.productTable
+    }).promise() 
+  }
+
   async updateProductItem (   
     createdAt: string,
     _UserId: string,
@@ -91,20 +91,6 @@ export class DataAccess {
       TableName: this.productTable
     }).promise() 
   }
-/*
-  async getItem( todoId : string, userId : string ) : Promise<TodoItem> {
-    const todoItem = {
-      Key: {
-        userId: userId,
-        todoId: todoId   
-      },
-      TableName: this.todoTable
-    }
-
-    const result = await this.docClient.get(todoItem).promise()
-    return result.Item as TodoItem
-  }
-*/
 
   async getAllProducts() : Promise<ProductItem[]> {
     logger.info("getAllProducts", { } )

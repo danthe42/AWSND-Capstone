@@ -44,7 +44,7 @@ provider:
     REVIEW_TABLE: Review-${self:provider.stage}-5
     REVIEWS_CREATED_AT_INDEX: ReviewsCreatedAtIndex-${self:provider.stage}-5
     PRODUCT_PRODUCTID_INDEX: ProductProductIDIndex-${self:provider.stage}-5
-    IMAGES_S3_BUCKET: reviewapp-images-azd49-${self:provider.stage}
+    REVIEWAPP_IMAGES_S3_BUCKET: reviewapp-images-azd49-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
     MAXIMUM_PRODUCT_COUNT: 100
 
@@ -111,25 +111,29 @@ functions:
         Resource:
           - '*' 
 
-#  GenerateUploadUrl:
-#    handler: src/lambda/http/generateUploadUrl.handler
-#    events:
-#      - http:
-#          method: post
-#          path: products/modify/{ProductID}/attachment
-#          cors: true
-#          authorizer: 
-#            name: Auth
-#    iamRoleStatements:
-#      - Effect: Allow
-#        Action:
-#          - s3:PutObject
-#        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
-#      - Effect: Allow
-#        Action:
-#          - dynamodb:GetItem
-#          - dynamodb:UpdateItem
-#        Resource: !GetAtt ProductDynamoDBTable.Arn
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: products/modify/{ProductID}/attachment
+          cors: true
+          authorizer: 
+            name: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: arn:aws:s3:::${self:provider.environment.REVIEWAPP_IMAGES_S3_BUCKET}/*
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCT_TABLE}/index/${self:provider.environment.PRODUCT_PRODUCTID_INDEX}
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource: !GetAtt ProductDynamoDBTable.Arn
 
   CreateReview:
     handler: src/lambda/http/createReview.handler
@@ -275,7 +279,7 @@ resources:
     ImagesBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.environment.IMAGES_S3_BUCKET}
+        BucketName: ${self:provider.environment.REVIEWAPP_IMAGES_S3_BUCKET}
         CorsConfiguration:
           CorsRules:
             -
@@ -302,7 +306,7 @@ resources:
               Effect: Allow
               Principal: '*'
               Action: 's3:GetObject'
-              Resource: 'arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*'
+              Resource: 'arn:aws:s3:::${self:provider.environment.REVIEWAPP_IMAGES_S3_BUCKET}/*'
         Bucket: !Ref ImagesBucket
 
 
