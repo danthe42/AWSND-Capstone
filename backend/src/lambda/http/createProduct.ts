@@ -6,6 +6,7 @@ import { CreateProductRequest } from '../../requests/CreateProductRequest'
 import { getUserId } from '../utils';
 import { createProduct } from '../../businessLogic/Logic'
 import { createLogger } from '../../utils/logger'
+import { ExtendedProductItem } from '../../models/ProductItem'
 
 const logger = createLogger('createProducts')
 
@@ -15,7 +16,7 @@ export const handler = middy(
     const userid = getUserId( event )
     try 
     {
-      const newItem = await createProduct(newProduct, userid)
+      const newItem : ExtendedProductItem = await createProduct(newProduct, userid)
 
       return {
         statusCode: 201,

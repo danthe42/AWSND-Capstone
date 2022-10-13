@@ -1,5 +1,5 @@
 import * as uuid from 'uuid'
-import { ProductItem } from '../models/ProductItem'
+import { ProductItem, ExtendedProductItem } from '../models/ProductItem'
 import { ReviewItem } from '../models/ReviewItem'
 import { ProductUpdate } from '../models/ProductUpdate'
 import { DataAccess } from '../dataLayer/DataAccess'
@@ -45,7 +45,7 @@ export async function updateProduct(
 export async function createProduct(
   createProductRequest: CreateProductRequest,
   userId: string
-): Promise<ProductItem> {
+): Promise<ExtendedProductItem> {
 
   const itemId = uuid.v4()
 
@@ -59,8 +59,14 @@ export async function createProduct(
     ...createProductRequest
   }) as ProductItem
 
-  logger.info("Created new product", newItem )
-  return newItem
+  let b : boolean = ( newItem.UserID == userId )
+  let rv : ExtendedProductItem = { 
+    UpdatePossible: b,
+    ...newItem
+  }
+
+  logger.info("Created new product", rv )
+  return rv
 }
 
 export async function createReview(
@@ -83,15 +89,27 @@ export async function createReview(
   return newItem
 }
 
-export async function getProducts(ProductID? : string ) : Promise<ProductItem[]> {
+export async function getProducts(userid : string, ProductID? : string ) : Promise<ExtendedProductItem[]> {
+  let rawProducts : ProductItem[] = undefined 
+
   if (ProductID)
   {
-    return await dataAccessor.getOneProduct(ProductID)        // DB Get
+    rawProducts = await dataAccessor.getOneProduct(ProductID)                    // DB Get
   }
   else
   {
-    return await dataAccessor.getAllProducts()                // DB Scan
+    rawProducts = await dataAccessor.getAllProducts()                             // DB Query
   }
+
+  let rv : ExtendedProductItem[] = rawProducts.map( (val, _index) => {
+    let b : boolean = ( val.UserID == userid )
+    return { 
+      UpdatePossible: b,
+      ...val
+    }
+  })
+  logger.info("getProducts final return from busineddlogic", rv )
+  return rv
 }
 
 export async function getReviews( UserID: string, ProductID : string ) : Promise<ReviewItem[]> {

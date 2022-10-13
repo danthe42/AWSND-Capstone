@@ -5,6 +5,7 @@ export interface Product {
   ImageUrl: string
   Title: string
   Description: string
+  UpdatePossible: boolean
 }
 
 export interface Review {

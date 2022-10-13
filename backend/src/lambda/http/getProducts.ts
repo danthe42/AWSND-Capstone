@@ -4,12 +4,16 @@ import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 import { getProducts } from '../../businessLogic/Logic'
 import { createLogger } from '../../utils/logger'
+import { getUserId } from '../utils';
+import { ExtendedProductItem } from '../../models/ProductItem'
 
 const logger = createLogger('getProducts')
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let pid = undefined
+    const userid = getUserId( event )
+
     if (event.pathParameters)
     {
       pid = event.pathParameters.ProductID
@@ -18,7 +22,7 @@ export const handler = middy(
 
     try 
     {
-      const products = await getProducts(pid)
+      const products : ExtendedProductItem[] = await getProducts(userid, pid)
       logger.info("getProducts", products )
 
       return {

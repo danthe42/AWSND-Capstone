@@ -28,7 +28,7 @@ export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
       console.log("okok")
       window.location.reload();
     } catch {
-      alert('Todo deletion failed')
+      alert('Product deletion failed. Are you sure this item was created by you ?')
     }
   }
 
@@ -44,6 +44,7 @@ export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
                 )}
           <Card.Description>{this.props.group.Description}</Card.Description>
         </Card.Content>
+              {this.props.group.UpdatePossible && (
                 <Button
                   icon
                   color="blue"
@@ -51,6 +52,8 @@ export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
                 >
                   <Icon name="pencil" />
                 </Button>
+              )}
+              {this.props.group.UpdatePossible && (
                 <Button
                   icon
                   color="red"
@@ -58,7 +61,8 @@ export class Group extends React.PureComponent<GroupCardProps, GroupCardState> {
                 >
                   <Icon name="delete" />
                 </Button>
-      </Card>
+              )}
+        </Card>
     )
   }
 }
