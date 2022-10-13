@@ -5,6 +5,9 @@ import { cors } from 'middy/middlewares'
 import { CreateProductRequest } from '../../requests/CreateProductRequest'
 import { getUserId } from '../utils';
 import { createProduct } from '../../businessLogic/Logic'
+import { createLogger } from '../../utils/logger'
+
+const logger = createLogger('createProducts')
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -21,9 +24,10 @@ export const handler = middy(
         })
       }
     } catch(e) {     
+      logger.info("createProducts exception", { error: e.message } )
       return {
         statusCode: 400,
-        body: e
+        body: JSON.stringify( { error: e.message } )
       }
     }
   }

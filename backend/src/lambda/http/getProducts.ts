@@ -28,9 +28,10 @@ export const handler = middy(
         })
       }
     } catch (e) {
+      logger.info("getProducts exception", { error: e.message } )
       return {
         statusCode: 400,
-        body: e
+        body: JSON.stringify( { error: e.message } )
       }
     }
   })

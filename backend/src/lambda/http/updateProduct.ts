@@ -7,6 +7,8 @@ import { cors, httpErrorHandler } from 'middy/middlewares'
 import { updateProduct } from '../../businessLogic/Logic'
 import { UpdateProductRequest } from '../../requests/UpdateProductRequest'
 import { getUserId } from '../utils'
+import { createLogger } from '../../utils/logger'
+const logger = createLogger('UpdateProduct')
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -21,9 +23,10 @@ export const handler = middy(
         body: ""
       }
     } catch(e) {
+      logger.info("UpdateProduct exception", { error: e.message } )
       return {
         statusCode: 401,
-        body: e
+        body: JSON.stringify( { error: e.message } )
       }
     }
   }

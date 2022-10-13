@@ -6,6 +6,9 @@ import { cors, httpErrorHandler } from 'middy/middlewares'
 
 import { createPresignedUrl } from '../../businessLogic/Logic'
 import { getUserId } from '../utils'
+import { createLogger } from '../utils/logger'
+
+const logger = createLogger('GenerateUploadUrl')
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -22,9 +25,10 @@ export const handler = middy(
         })
       }
     } catch (e) {
+      logger.info("generateUploadUrl exception", { error: e.message } )
       return {
         statusCode: 400,
-         body: e
+        body: JSON.stringify( { error: e.message } )
        }
     }
   }
